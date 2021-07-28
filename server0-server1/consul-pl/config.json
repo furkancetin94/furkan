@@ -1,0 +1,13 @@
+{
+    "server": false,
+    "datacenter": "dc",
+    "bind_addr": "{{ ansible_facts.default_ipv4.address }}",
+    "data_dir": "/var/consul",
+    "encrypt": "3DYqZ2bKxZi32GYsfrF6sZRTjvFOH8YyTT0AwqSFf/A=",
+    "log_level": "INFO",
+    "enable_syslog": true,
+    "leave_on_terminate": true,
+    "start_join": [
+        "192.168.1.110"
+    ]
+}

@@ -1,0 +1,5 @@
+---
+- name: Kubernetes installation
+  hosts: all
+  roles:
+    - first-blood

@@ -1,0 +1,123 @@
+---
+#- name: hosts file configuration
+#  template:
+#    src: hosts.j2
+#    dest: /etc/hosts
+
+- name: copy repo file
+  copy:
+    src: kubernetes.repo
+    dest: /etc/yum.repos.d/kubernetes.repo
+
+- name: docker and kubernetes installation
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - docker
+    - kubelet
+    - kubectl
+    - kubeadm
+
+- name: yum update all
+  yum:
+    name: '*'
+    state: latest
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Disable swapoff
+  shell: swapoff -a
+
+- name: Disable swapoff permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: yes
+
+- name: disable fireewall
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
+
+- name: enabled docker and kubelet
+  service: 
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - kubelet
+    - docker
+
+- name: copy init-config file
+  copy:
+    src: init-config.yml
+    dest: /tmp/init-config.yml
+  when: "'master' in group_names"
+
+- name: copy script file
+  copy:
+    src: script.sh
+    dest: /tmp/script.sh
+  when: "'master' in group_names"
+  
+- name: 1 kere alınan hata sonrası eklenen komut
+  shell: echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+  when: "'master' in group_names"
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: sh /tmp/script.sh
+  when: "'master' in group_names"
+
+- name: Setup kubeconfig for root user
+  command: "{{ item }}"
+  with_items:
+     - mkdir -p /root/.kube
+     - cp -i /etc/kubernetes/admin.conf /root/.kube/config
+     - chown root:root /root/.kube/config
+  when: "'master' in group_names"
+
+- name: set env for root
+  shell: "export KUBECONFIG=/etc/kubernetes/admin.conf"
+  when: "'master' in group_names"
+
+- name: set environment
+  lineinfile:
+    line: KUBECONFIG=/etc/kubernetes/admin.conf
+    path: /root/.bash_profile
+  when: "'master' in group_names"
+
+- name: Flannel2
+  command: kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+  when: "'master' in group_names"
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+  when: "'master' in group_names"
+
+- name: Copy join command to local file
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+  when: "'master' in group_names"
+
+- name: Copy the join command to server location
+  copy: src=join-command dest=/tmp/join-command.sh mode=0777
+  when: "'worker' in group_names"
+  
+- name: 1 kere alınan hata sonrası eklenen komut
+  shell: echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+  when: "'worker' in group_names"
+
+- name: Join the node to cluster
+  command: sh /tmp/join-command.sh
+  when: "'worker' in group_names"
+  
+- name: worker node label
+  shell: kubectl label node worker node-role.kubernetes.io/worker=worker
+  when: "'master' in group_names"
+ 
+

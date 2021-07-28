@@ -1,0 +1,6 @@
+127.0.0.1	localhost
+::1             localhost
+
+{% for host in groups['kubernetes'] %}
+{{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }} {{ hostvars[host]['ansible_facts']['fqdn'] }} {{ hostvars[host]['ansible_facts']['hostname'] }}
+{% endfor %}

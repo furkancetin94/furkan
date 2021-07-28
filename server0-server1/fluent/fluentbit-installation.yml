@@ -1,0 +1,16 @@
+---
+- name: prometheus ve nginx
+  hosts: master
+  tasks:
+    - name: create namespace logging
+      shell: kubectl create namespace logging
+      
+    - name: create CM 
+      shell: kubectl create -f /tmp/git/server0-server1/fluent/configmap.yaml
+    
+    - name: create SA
+      shell: kubectl create -f /tmp/git/server0-server1/fluent/fluentbit-sa.yaml
+    
+    - name: create DS
+      shell: kubectl create -f /tmp/git/server0-server1/fluent/fluentbit-ds.yaml
+    

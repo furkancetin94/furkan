@@ -1,0 +1,11 @@
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '/root/node_exporter-1.1.2.linux-amd64/node_exporter'
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target

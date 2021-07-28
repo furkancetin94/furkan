@@ -1,0 +1,38 @@
+---
+- name: prometheus ve nginx
+  hosts: master
+  tasks:
+    - name: create namespace monitoring
+      shell: kubectl create namespace monitoring
+      
+    - name: install git
+      yum:
+        name: git
+        state: present
+        
+    - name: copy 
+      copy:
+        src: /home/eyup/furkan
+        dest: /tmp
+      
+    - name: create CR 
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/clusterRole.yaml
+    
+    - name: create CM
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/config-map.yaml
+    
+    - name: create Deployment
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/prometheus-deployment.yaml
+    
+    - name: create Service (NodePort)
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/prometheus-service.yaml
+    
+    - name: create ingress
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/prometheus-ingress.yaml
+    
+    - name: create ingress controller - daemonset - nginx
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/nginx-prometheus/nginx-ingress-daemonset.yml
+      
+    - name: kube-state-metrics-configs
+      shell: kubectl create -f /tmp/furkan/server0-server1/second-blood/kube-state-metrics-configs/
+

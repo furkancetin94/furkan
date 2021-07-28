@@ -1,0 +1,27 @@
+---
+- name: node-exporter kurulumu
+  hosts: all
+  become: true
+  tasks:
+
+    - name: unzip file
+      copy:
+        src: node_exporter-1.1.2.linux-amd64.tar.gz 
+        dest: /root
+
+    - name: unzipfile
+      command: tar xvfz /root/node_exporter-1.1.2.linux-amd64.tar.gz -C /root
+
+    - name: service file
+      copy:
+        src: node-exporter.service
+        dest: /etc/systemd/system/node-exporter.service
+
+    - name: systemctl reload
+      shell: systemctl daemon-reload
+
+    - name: started service
+      service:
+        name: node-exporter.service
+        state: started
+        enabled: true

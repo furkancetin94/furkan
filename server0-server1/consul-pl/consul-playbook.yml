@@ -1,0 +1,64 @@
+---
+- name: consul client kurulum
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Creating Consul User Group
+      group:
+        name: consul
+     
+    - name: Creating Consul User
+      user:
+        name: consul
+        group: consul
+        system: yes
+        shell: "/sbin/nologin"
+        comment: "consul nologin User"
+        createhome: "no"
+        state: present
+
+    - name: unzip download
+      yum:
+        name: unzip
+        state: latest
+    
+    - name: consul download
+      get_url:
+        url: https://releases.hashicorp.com/consul/1.4.4/consul_1.4.4_linux_amd64.zip
+        dest: /opt/consul.zip
+    
+    - name: unzip file
+      unarchive:
+        src: /opt/consul.zip
+        dest: /usr/bin
+        remote_src: yes
+
+    - name: Dosya oluşturma
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: consul
+        group: consul        
+      loop:
+        - /etc/consul.d
+        - /var/consul
+    
+    - name: copy config file
+      copy:
+        src: config.json
+        dest: /etc/consul.d/
+    
+    - name: copy service file
+      copy:
+        src: consul-client.service
+        dest: /etc/systemd/system/
+    
+    - name: daemon-reload
+      shell: systemctl daemon-reload
+    
+    - name: Enabled Consul Service
+      service:
+        name: consul-client
+        enabled: yes
+        state: started
