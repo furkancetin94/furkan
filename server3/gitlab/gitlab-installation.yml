@@ -1,0 +1,42 @@
+---
+- name: gitlab installaiton
+  hosts: server3
+  tasks:
+    - name: bagimlilikleri yukleme
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - curl
+        - ca-certificates
+        - policycoreutils
+        - openssh-server
+        - cronie
+        - postfix
+        - git
+        - epel-release
+        - ansible
+
+    - name:  add Repository Gitlab CE
+      shell: curl -L -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | bash
+
+    - name: bagimlilikleri yukleme
+      yum:
+        name: gitlab-ce
+        state: latest
+
+    - name: Copy GitLab configuration file
+      copy:
+        content: "external_url 'http://192.168.1.111'"
+        dest: /etc/gitlab/gitlab.rb
+
+    - name: service started
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - postfix
+
+    - name: Reconfigure and restart GitLab
+      shell: gitlab-ctl reconfigure && gitlab-ctl restart
