@@ -1,0 +1,6 @@
+
+---
+- hosts: server2
+  roles:
+    - prometheus
+    - alertmanager

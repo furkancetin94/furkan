@@ -1,0 +1,32 @@
+{
+    "bind_addr": "{{ internal_ip }}",
+    "bootstrap_expect": 1,
+    "client_addr": "0.0.0.0",
+    "datacenter": "dc",
+    "data_dir": "/var/consul",
+    "domain": "consul",
+    "node_name": "{{ internal_ip }}",
+    "enable_script_checks": true,
+    "dns_config": {
+        "enable_truncate": true,
+        "only_passing": true
+    },
+    "enable_syslog": true,
+    "encrypt": "{{ encrypt.stdout_lines[0] }}",
+    "leave_on_terminate": true,
+    "log_level": "INFO",
+    "rejoin_after_leave": true,
+    "server": true,
+    "start_join": [
+        "{{ internal_ip }}"
+    ],
+    "ui": true,
+
+    "Service": {
+    "Address": "{{ node_exporter }}",
+    "Name": "node-exporter",
+    "Port": 9100
+    }
+
+
+}

@@ -1,0 +1,15 @@
+---
+- name: kullanıcı olusturma
+  hosts: all
+  tasks:
+    - name: ansible user
+      user:
+        name: ansible
+        password: "$6$mysalt$FFZObIImwNMmUGNvZvavUlJpnxcxEGbQaqFJrg1etJ8WYJMoBpLcLX5wbQ1wi3IuybPiRilcoUnvHaCUc2HIo."
+        state: present
+
+    - name: root yetkisi
+      lineinfile:
+        line: "ansible ALL=(ALL) NOPASSWD: ALL"
+        path: /etc/sudoers
+
