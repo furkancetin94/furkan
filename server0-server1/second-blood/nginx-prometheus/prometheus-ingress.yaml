@@ -11,7 +11,7 @@ metadata:
 spec:
   rules:
   # Use the host you used in your kubernetes Ingress Configurations
-  - host: prometheus-server.devopstrend.com
+  - host: prometheus-server.furkan.com
     http:
       paths:
       - backend:
